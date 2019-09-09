@@ -1,4 +1,6 @@
 from flask import Flask, request, render_template,jsonify
+import subprocess as sp
+import re
 import nltk
 from autocorrect import spell
 from gensim.summarization import summarize as g_sumn
@@ -34,6 +36,24 @@ def summarize():
     }
     result = {str(key): value for key, value in result.items()}
     return jsonify(result=result)
+
+@app.route("/generate", methods=["GET","POST"])
+def generate():
+    text = request.form['text']
+
+    text=str(text)
+    
+    text=text.replace("&lt;","<")
+    text=text.replace("&gt;",">")
+
+    text_file = open("temp.txt", "w")
+    text_file.write(text)
+    text_file.close()
+
+    text += "hello world!"
+    p = sp.getoutput("./test.sh")
+    text += str(p)
+    return text
 
 if __name__ == '__main__':
     app.run(port=8888)

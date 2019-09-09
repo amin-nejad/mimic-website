@@ -43,13 +43,26 @@
 	<link rel="stylesheet" href="static/css/style.css">
 
 	<!-- Modernizr JS -->
-	<script src="js/modernizr-2.6.2.min.js"></script>
+	<script src="static/js/modernizr-2.6.2.min.js"></script>
 	<!-- FOR IE9 below -->
 	<!--[if lt IE 9]>
 	<script src="js/respond.min.js"></script>
 	<![endif]-->
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+	
 	<script>
+
+	function escapeHtml(text) {
+		var map = {
+			'&': '&amp;',
+			'<': '&lt;',
+			'>': '&gt;',
+			'"': '&quot;',
+			"'": '&#039;'
+		};
+
+		return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+	}
 
 	function text_sum() {
 	var text= $('#text_sum_text').val();
@@ -65,9 +78,89 @@
 						html+="<b>Keywords Extracted :</b>"+val
 					});
 					html +="";
+					$(".text_sum").empty()
 					$(".text_sum").append(html);
 				});
 	};
+
+	function generate() {
+		var html= "";
+		var text= "";
+		
+		// hint
+		text += $('#input_hint').val().toLowerCase()
+		text += " &lt;H&gt; "
+
+		// gender
+		text += $('#input_gender').val()
+		text += " &lt;G&gt; "		
+
+		// age
+		text += $('#input_age').val()
+		text += " &lt;A&gt; "
+
+		// ethnicity
+		text += $('#input_ethnicity').val().toLowerCase()
+		text += " &lt;E&gt; "
+		
+		// diagnoses
+		text += $('#input_diagnosis1').val().toLowerCase()
+
+		if($('#input_diagnosis2').val()!=""){
+			text += " | " + $('#input_diagnosis2').val().toLowerCase()
+		}
+		if($('#input_diagnosis3').val()!=""){
+			text += " | " + $('#input_diagnosis3').val().toLowerCase()
+		}
+		if($('#input_diagnosis4').val()!=""){
+			text += " | " + $('#input_diagnosis4').val().toLowerCase()
+		}
+		if($('#input_diagnosis5').val()!=""){
+			text += " | " + $('#input_diagnosis5').val().toLowerCase()
+		}
+		text += " &lt;D&gt; "
+			
+		// procedures
+		text += $('#input_procedure1').val().toLowerCase()
+
+		if($('#input_procedure2').val()!=""){
+			text += " | " + $('#input_procedure2').val().toLowerCase()
+		}
+		if($('#input_procedure3').val()!=""){
+			text += " | " + $('#input_procedure3').val().toLowerCase()
+		}
+		if($('#input_procedure4').val()!=""){
+			text += " | " + $('#input_procedure4').val().toLowerCase()
+		}
+		if($('#input_procedure5').val()!=""){
+			text += " | " + $('#input_procedure5').val().toLowerCase()
+		}
+		text += " &lt;P&gt; "
+		
+		// medications
+		text += $('#input_medication1').val().toLowerCase() + " , " + $('#input_medication_dosage1').val().toLowerCase()
+		text += " &lt;M&gt; "
+
+		// microbiology results
+		text += $('#input_micro1').val().toLowerCase() + " : " + $('#input_micro_result1').val().toLowerCase()
+		text += " &lt;T&gt; "
+		
+		// lab results
+		text += $('#input_lab1').val().toLowerCase() + " , " + $('#input_lab_result1').val().toLowerCase() + " , " + $('#input_lab_unit1').val().toLowerCase()
+		text += " &lt;L&gt; "
+
+		$.ajax({
+				  url: "/generate",
+				  type: "POST",
+				  data: {text:text}
+			  }).done(function(response) {
+				var html= "";				
+				html+="<b>Keywords Extracted :</b>" + escapeHtml(response)
+				$(".text_out").empty()
+				$(".text_out").append(html);
+			});
+	};
+
 	</script>
 	</head>
 	<body>
@@ -112,12 +205,346 @@
 				</div>
 				<div class="row">
 					<div class="col-md-12 animate-box" data-animate-effect="fadeInLeft">
-						<p class="fh5co-lead">
-							<i style="font-size: small;">Enter some text (more than 2 sentences)</i> <br>
-							<input type="text" id="text_sum_text" style="height:200px; font-size:14pt;width: 50%;">
-							<button id="text_sum_clicked" onclick="text_sum()" class="btn btn-primary btn-outline">Submit</button>
+						<i 
+							class="fh5co-lead">
+							<i 
+								style="font-size: large;">
+									Hint
+							</i> 
+							<br>
+							<input 
+								type="text" 
+								id="input_hint" 
+								style="height:25px; font-size:14pt;width: 50%;"
+								value="Admission Date: 2187/4/3 Discharge Date: 2187/5/3">
+						</i>
+						<br><br>
+						<i 
+							class="fh5co-lead">
+							<i 
+								style="font-size: large;">
+									Gender
+							</i> 
+							<br>
+							<select 
+								name="gender" 
+								id="input_gender"
+								style="height:25px; font-size:14pt;width: 5%;">
+									<option value="M">M</option>
+									<option value="F">F</option>
+							</select>
+						</i>
+						<br><br>
+						<i 
+							class="fh5co-lead">
+							<i 
+								style="font-size: large;">
+									Age
+							</i> 
+							<br>
+							<input 
+								type="number" 
+								id="input_age" 
+								style="height:25px; font-size:14pt;width: 10%;"
+								value=87>
+						</i>
+						<br><br>
+						<i 
+							class="fh5co-lead">
+							<i 
+								style="font-size: large;">
+									Ethnicity
+							</i> 
+							<br>
+							<select 
+								name="ethnicities" 
+								id="input_ethnicity"
+								style="height:25px; font-size:14pt;width: 10%;">
+									<option value="white">White</option>
+									<option value="black">Black</option>
+									<option value="latino">Latino</option>
+									<option value="asian">Asian</option>
+									<option value="other">Other</option>
+							</select>
+						</i>
+						<br><br>
+						<i 
+							class="fh5co-lead">
+							<i 
+								style="font-size: large;">
+									Diagnoses
+							</i> 
+							<br>
+							<input 
+								type="text" 
+								id="input_diagnosis1" 
+								style="height:25px; font-size:14pt;width: 50%;"
+								value="metastatic pancreatic cancer"> <br>
+							<input 
+								type="text" 
+								id="input_diagnosis2" 
+								style="height:25px; font-size:14pt;width: 50%;"><br>
+							<input 
+								type="text" 
+								id="input_diagnosis3" 
+								style="height:25px; font-size:14pt;width: 50%;"><br>
+							<input 
+								type="text" 
+								id="input_diagnosis4" 
+								style="height:25px; font-size:14pt;width: 50%;"><br>
+							<input 
+								type="text" 
+								id="input_diagnosis5" 
+								style="height:25px; font-size:14pt;width: 50%;"><br>
+						</i>
+						<br>
+						<i 
+							class="fh5co-lead">
+							<i 
+								style="font-size: large;">
+									Procedures
+							</i> 
+							<br>
+							<input 
+								type="text" 
+								id="input_procedure1" 
+								style="height:25px; font-size:14pt;width: 50%;"
+								value="complete pancreatectomy"> <br>
+							<input 
+								type="text" 
+								id="input_procedure2" 
+								style="height:25px; font-size:14pt;width: 50%;"><br>
+							<input 
+								type="text" 
+								id="input_procedure3" 
+								style="height:25px; font-size:14pt;width: 50%;"><br>
+							<input 
+								type="text" 
+								id="input_procedure4" 
+								style="height:25px; font-size:14pt;width: 50%;"><br>
+							<input 
+								type="text" 
+								id="input_procedure5" 
+								style="height:25px; font-size:14pt;width: 50%;"><br>
+						</i>
+						<br>
+						<i 
+							class="fh5co-lead">
+							<i 
+								style="font-size: large;">
+									Medications
+							</i> 
+							<br>
+							<i style="font-size: small;">Drug &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+									Dosage</i> <br>
+							<input 
+								type="text" 
+								id="input_medication1" 
+								style="height:25px; font-size:14pt;width: 20%"
+								value="warfarin">&ensp; 
+							<input 
+								type="text" 
+								id="input_medication_dosage1" 
+								style="height:25px; font-size:14pt;width: 10%;"
+								value="1mg Tablet"><br>
+							<input 
+								type="text" 
+								id="input_medication2" 
+								style="height:25px; font-size:14pt;width: 20%;">&ensp;
+							<input 
+								type="text" 
+								id="input_medication_dosage2" 
+								style="height:25px; font-size:14pt;width: 10%;"><br>
+							<input 
+								type="text" 
+								id="input_medication3" 
+								style="height:25px; font-size:14pt;width: 20%;">&ensp;
+							<input 
+								type="text" 
+								id="input_medication_dosage3" 
+								style="height:25px; font-size:14pt;width: 10%;"><br>
+							<input 
+								type="text" 
+								id="input_medication4" 
+								style="height:25px; font-size:14pt;width: 20%;">&ensp;
+							<input 
+								type="text" 
+								id="input_medication_dosage4" 
+								style="height:25px; font-size:14pt;width: 10%;"><br>
+							<input 
+								type="text" 
+								id="input_medication5" 
+								style="height:25px; font-size:14pt;width: 20%;">&ensp;
+							<input 
+								type="text" 
+								id="input_medication_dosage5" 
+								style="height:25px; font-size:14pt;width: 10%;"><br>
+						</i>
+						<br>
+						<i 
+							class="fh5co-lead">
+							<i 
+								style="font-size: large;">
+									Microbiology Tests
+							</i> 
+							<br>
+							<i style="font-size: small;">Location &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+								 Organisms</i> <br>
+							<input 
+								type="text" 
+								id="input_micro1" 
+								style="height:25px; font-size:14pt;width: 20%"
+								value="urine">&ensp; 
+							<input 
+								type="text" 
+								id="input_micro_result1" 
+								style="height:25px; font-size:14pt;width: 20%;"
+								value="staphylococcus species"><br>
+							<input 
+								type="text" 
+								id="input_micro2" 
+								style="height:25px; font-size:14pt;width: 20%;">&ensp;
+							<input 
+								type="text" 
+								id="input_micro_result2" 
+								style="height:25px; font-size:14pt;width: 20%;"><br>
+							<input 
+								type="text" 
+								id="input_micro3" 
+								style="height:25px; font-size:14pt;width: 20%;">&ensp;
+							<input 
+								type="text" 
+								id="input_micro_result3" 
+								style="height:25px; font-size:14pt;width: 20%;"><br>
+							<input 
+								type="text" 
+								id="input_micro4" 
+								style="height:25px; font-size:14pt;width: 20%;">&ensp;
+							<input 
+								type="text" 
+								id="input_micro_result4" 
+								style="height:25px; font-size:14pt;width: 20%;"><br>
+							<input 
+								type="text" 
+								id="input_micro5" 
+								style="height:25px; font-size:14pt;width: 20%;">&ensp;
+							<input 
+								type="text" 
+								id="input_micro_result5" 
+								style="height:25px; font-size:14pt;width: 20%;"><br>
+						</i>
+						<br>
+						<i 
+							class="fh5co-lead">
+							<i 
+								style="font-size: large;">
+									Lab Tests
+							</i> 
+							<br>
+							<i style="font-size: small;">Test &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+									Result &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+									Units</i> <br>
+							<input 
+								type="text" 
+								id="input_lab1" 
+								style="height:25px; font-size:14pt;width: 20%"
+								value="Calcium">&ensp; 
+							<input 
+								type="text" 
+								id="input_lab_result1" 
+								style="height:25px; font-size:14pt;width: 10%;"
+								value="10.0">&ensp; 
+							<input 
+								type="text" 
+								id="input_lab_unit1" 
+								style="height:25px; font-size:14pt;width: 10%;"
+								value="mg/dL">&ensp; 
+								<input type="checkbox" name="abnormal1" value="False"> <i style="font-size: small;">Abnormal</i> <br>
+							<input 
+								type="text" 
+								id="input_lab2" 
+								style="height:25px; font-size:14pt;width: 20%;">&ensp;
+							<input 
+								type="text" 
+								id="input_lab_result2" 
+								style="height:25px; font-size:14pt;width: 10%;">&ensp;
+							<input 
+								type="text" 
+								id="input_lab_unit2" 
+								style="height:25px; font-size:14pt;width: 10%;">&ensp; 
+								<input type="checkbox" name="abnormal2" value="False"> <i style="font-size: small;">Abnormal</i> <br>
+							<input 
+								type="text" 
+								id="input_lab3" 
+								style="height:25px; font-size:14pt;width: 20%;">&ensp;
+							<input 
+								type="text" 
+								id="input_lab_result3" 
+								style="height:25px; font-size:14pt;width: 10%;">&ensp;
+							<input 
+								type="text" 
+								id="input_lab_unit3" 
+								style="height:25px; font-size:14pt;width: 10%;">&ensp; 
+								<input type="checkbox" name="abnormal3" value="False"> <i style="font-size: small;">Abnormal</i> <br>
+							<input 
+								type="text" 
+								id="input_lab4" 
+								style="height:25px; font-size:14pt;width: 20%;">&ensp;
+							<input 
+								type="text" 
+								id="input_lab_result4" 
+								style="height:25px; font-size:14pt;width: 10%;">&ensp; 
+							<input 
+								type="text" 
+								id="input_lab_unit4" 
+								style="height:25px; font-size:14pt;width: 10%;">&ensp; 
+								<input type="checkbox" name="abnormal4" value="False"> <i style="font-size: small;">Abnormal</i> <br>
+							<input 
+								type="text" 
+								id="input_lab5" 
+								style="height:25px; font-size:14pt;width: 20%;">&ensp;
+							<input 
+								type="text" 
+								id="input_lab_result5" 
+								style="height:25px; font-size:14pt;width: 10%;">&ensp;
+							<input 
+								type="text" 
+								id="input_lab_unit5" 
+								style="height:25px; font-size:14pt;width: 10%;">&ensp; 
+								<input type="checkbox" name="abnormal5" value="False"> <i style="font-size: small;">Abnormal</i> <br>
+						</i>
+						<br>
+						<!--
+						<p 
+							class="fh5co-lead">
+							<i 
+								style="font-size: small;">
+									Enter some text (more than 2 sentences)
+							</i> 
+							<br>
+							<input 
+								type="text" 
+								id="text_sum_text" 
+								style="height:200px; font-size:14pt;width: 50%;">
+							<button 
+								id="text_sum_clicked" 
+								onclick="text_sum()" 
+								class="btn btn-primary btn-outline">
+									Submit
+							</button>
 						</p>
-						<p class="text_sum">
+						-->
+						<p 
+						class="fh5co-lead">
+						<button 
+							id="text_out_clicked" 
+							onclick="generate()" 
+							class="btn btn-primary btn-outline">
+								Submit
+						</button>
+						</p>
+						<p 
+							class="text_out">
 						</p>
 					</div>						
 				</div>
@@ -126,23 +553,23 @@
 	</div>
 
 	<!-- jQuery -->
-	<script src="js/jquery.min.js"></script>
+	<script src="static/js/jquery.min.js"></script>
 	<!-- jQuery Easing -->
-	<script src="js/jquery.easing.1.3.js"></script>
+	<script src="static/js/jquery.easing.1.3.js"></script>
 	<!-- Bootstrap -->
-	<script src="js/bootstrap.min.js"></script>
+	<script src="static/js/bootstrap.min.js"></script>
 	<!-- Carousel -->
-	<script src="js/owl.carousel.min.js"></script>
+	<script src="static/js/owl.carousel.min.js"></script>
 	<!-- Stellar -->
-	<script src="js/jquery.stellar.min.js"></script>
+	<script src="static/js/jquery.stellar.min.js"></script>
 	<!-- Waypoints -->
-	<script src="js/jquery.waypoints.min.js"></script>
+	<script src="static/js/jquery.waypoints.min.js"></script>
 	<!-- Counters -->
-	<script src="js/jquery.countTo.js"></script>
+	<script src="static/js/jquery.countTo.js"></script>
 	
 	
 	<!-- MAIN JS -->
-	<script src="js/main.js"></script>
+	<script src="static/js/main.js"></script>
 
 	</body>
 </html>
