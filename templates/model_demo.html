@@ -55,33 +55,12 @@
 	function escapeHtml(text) {
 		var map = {
 			'&': '&amp;',
-			'<': '&lt;',
-			'>': '&gt;',
 			'"': '&quot;',
 			"'": '&#039;'
 		};
 
-		return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+		return text.replace(/[&"']/g, function(m) { return map[m]; });
 	}
-
-	function text_sum() {
-	var text= $('#text_sum_text').val();
-	  $.ajax({
-				  url: "/summarize",
-				  type: "POST",
-				  data: {text:text}
-			  }).done(function(response) {
-				var html= "";
-				response =response.result;
-					 $.each(response,function(key,val){
-					 console.log(val);
-						html+="<b>Keywords Extracted :</b>"+val
-					});
-					html +="";
-					$(".text_sum").empty()
-					$(".text_sum").append(html);
-				});
-	};
 
 	function generate() {
 		var html= "";
@@ -139,25 +118,74 @@
 		
 		// medications
 		text += $('#input_medication1').val().toLowerCase() + " , " + $('#input_medication_dosage1').val().toLowerCase()
+		if($('#input_medication2').val()!=""){
+			text += " | " + $('#input_medication2').val().toLowerCase()+ " , " + $('#input_medication_dosage2').val().toLowerCase()
+		}
+		if($('#input_medication3').val()!=""){
+			text += " | " + $('#input_medication3').val().toLowerCase()+ " , " + $('#input_medication_dosage3').val().toLowerCase()
+		}
+		if($('#input_medication4').val()!=""){
+			text += " | " + $('#input_medication4').val().toLowerCase()+ " , " + $('#input_medication_dosage4').val().toLowerCase()
+		}
+		if($('#input_medication5').val()!=""){
+			text += " | " + $('#input_medication5').val().toLowerCase()+ " , " + $('#input_medication_dosage5').val().toLowerCase()
+		}
 		text += " &lt;M&gt; "
 
 		// microbiology results
 		text += $('#input_micro1').val().toLowerCase() + " : " + $('#input_micro_result1').val().toLowerCase()
+		if($('#input_micro2').val()!=""){
+			text += " | " + $('#input_micro2').val().toLowerCase()+ " : " + $('#input_micro_result2').val().toLowerCase()
+		}
+		if($('#input_micro3').val()!=""){
+			text += " | " + $('#input_micro3').val().toLowerCase()+ " : " + $('#input_micro_result3').val().toLowerCase()
+		}
+		if($('#input_micro4').val()!=""){
+			text += " | " + $('#input_micro4').val().toLowerCase()+ " : " + $('#input_micro_result4').val().toLowerCase()
+		}
+		if($('#input_micro5').val()!=""){
+			text += " | " + $('#input_micro5').val().toLowerCase()+ " : " + $('#input_micro_result5').val().toLowerCase()
+		}
 		text += " &lt;T&gt; "
 		
 		// lab results
 		text += $('#input_lab1').val().toLowerCase() + " , " + $('#input_lab_result1').val().toLowerCase() + " , " + $('#input_lab_unit1').val().toLowerCase()
+		if($('#input_lab2').val()!=""){
+			text += " | " + $('#input_lab2').val().toLowerCase()+ " , " + $('#input_lab_result2').val().toLowerCase() + " , " + $('#input_lab_unit2').val().toLowerCase()
+		}
+		if($('#input_lab3').val()!=""){
+			text += " | " + $('#input_lab3').val().toLowerCase()+ " , " + $('#input_lab_result3').val().toLowerCase() + " , " + $('#input_lab_unit3').val().toLowerCase()
+		}
+		if($('#input_lab4').val()!=""){
+			text += " | " + $('#input_lab4').val().toLowerCase()+ " , " + $('#input_lab_result4').val().toLowerCase() + " , " + $('#input_lab_unit4').val().toLowerCase()
+		}
+		if($('#input_lab5').val()!=""){
+			text += " | " + $('#input_lab5').val().toLowerCase()+ " , " + $('#input_lab_result5').val().toLowerCase() + " , " + $('#input_lab_unit5').val().toLowerCase()
+		}
 		text += " &lt;L&gt; "
 
+		// model
+		model = $('#model').val().toLowerCase()
+		resource = $('#resource').val().toLowerCase()
+
 		$.ajax({
-				  url: "/generate",
-				  type: "POST",
-				  data: {text:text}
-			  }).done(function(response) {
-				var html= "";				
-				html+="<b>Keywords Extracted :</b>" + escapeHtml(response)
-				$(".text_out").empty()
-				$(".text_out").append(html);
+				url: "/generate",
+				type: "POST",
+				data: {text:text, model:model, resource:resource},
+				beforeSend: function() {
+					$("#loaderDiv").show();
+				},
+				success: function(data) {
+					$("#loaderDiv").hide();
+				}
+			}).done(function(response) {
+			var html = "<b>Discharge Summary :</b> <br>";
+			response = response.replace(/<PAR>/g, '<br/>');
+			response = escapeHtml(response);
+			
+			html += response;
+			$(".text_out").empty();
+			$(".text_out").append(html);
 			});
 	};
 
@@ -216,7 +244,7 @@
 								type="text" 
 								id="input_hint" 
 								style="height:25px; font-size:14pt;width: 50%;"
-								value="Admission Date: 2187/4/3 Discharge Date: 2187/5/3">
+								value="Admission date : [ 2164/8/31 ] Discharge date : [">
 						</i>
 						<br><br>
 						<i 
@@ -262,7 +290,7 @@
 								style="height:25px; font-size:14pt;width: 10%;">
 									<option value="white">White</option>
 									<option value="black">Black</option>
-									<option value="latino">Latino</option>
+									<option value="hispanic">Hispanic</option>
 									<option value="asian">Asian</option>
 									<option value="other">Other</option>
 							</select>
@@ -514,26 +542,38 @@
 								<input type="checkbox" name="abnormal5" value="False"> <i style="font-size: small;">Abnormal</i> <br>
 						</i>
 						<br>
-						<!--
-						<p 
+						<i 
 							class="fh5co-lead">
 							<i 
-								style="font-size: small;">
-									Enter some text (more than 2 sentences)
+								style="font-size: large;">
+									Model
 							</i> 
 							<br>
-							<input 
-								type="text" 
-								id="text_sum_text" 
-								style="height:200px; font-size:14pt;width: 50%;">
-							<button 
-								id="text_sum_clicked" 
-								onclick="text_sum()" 
-								class="btn btn-primary btn-outline">
-									Submit
-							</button>
-						</p>
-						-->
+							<select 
+								name="model" 
+								id="model"
+								style="height:25px; font-size:14pt;width: 15%;">
+									<option value="Transformer">Transformer</option>
+									<option value="GPT-2">GPT-2</option>
+							</select>
+						</i>
+						<br><br>
+						<i 
+							class="fh5co-lead">
+							<i 
+								style="font-size: large;">
+									Model Dataset
+							</i> 
+							<br>
+							<select 
+								name="resource" 
+								id="resource"
+								style="height:25px; font-size:14pt;width: 15%;">
+									<option value="Full">Full</option>
+									<option value="Low">Low</option>
+							</select>
+						</i>
+						<br><br>
 						<p 
 						class="fh5co-lead">
 						<button 
@@ -543,6 +583,9 @@
 								Submit
 						</button>
 						</p>
+						<div id="loaderDiv" style="display: none">
+							<img src="static/images/spinner.gif">
+						</div>
 						<p 
 							class="text_out">
 						</p>
